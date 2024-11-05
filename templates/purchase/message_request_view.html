@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="page-content-wrapper">
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="page-title-box">
+                    <h4 class="page-title">Request Details</h4>
+                </div>
+            </div>
+        </div>
+        <!-- end page title end breadcrumb -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card mt-4" style="margin-top: 20px;">
+                    <div class="card-body">
+
+                        <h4 class="mt-0 header-title"></h4>
+                        <p class="text-muted mb-4 font-13"></p>
+                        <!-- Error message for response field -->
+                            {% if error_message %}
+                                <div class="error text-danger">{{ error_message }}</div>
+                            {% endif %}
+                        <table class="table mb-2" id="my-table">
+                            <tbody>
+                                <tr>
+                                    <th>Category</th>
+                                    <td>{{ data.category.category_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <td>{{ data.name.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Required Stock Quantity</th>
+                                    <td>{{ data.stock }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Expected Date</th>
+                                    <td>{{ data.input_date }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Remarks</th>
+                                    <td>{{ data.remarks }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Form Section -->
+                        <form method="POST" action="{% url 'message_response' data.id %}">
+                            {% csrf_token %}
+
+                            <!-- Buttons Section -->
+                            <div class="text-center mt-4">
+                                <!-- Accept Button -->
+                                <button type="submit" name="accept" class="btn btn-success mr-2">
+                                    Accept
+                                </button>
+
+                                <!-- Decline Button -->
+                                <button type="button" id="decline-btn" class="btn btn-danger">
+                                    Decline
+                                </button>
+                            </div>
+
+                            <!-- Span for Reason Input (Initially Hidden) -->
+                            <div id="decline-reason" class="text-center mt-4" style="display: none;">
+                                <div class="form-group">
+                                    <label for="decline_reason">Please provide a reason for declining:</label>
+                                    <textarea name="response" id="decline_reason" class="form-control" placeholder="Enter reason here" style="max-width: 400px; margin: 0 auto;"></textarea>
+                                </div>
+                                <button type="submit" name="decline" class="btn btn-primary mr-2" id="submit-reason-btn">
+                                    Submit Reason
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="cancel-reason-btn">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div> <!-- end col -->
+        </div> <!-- end row -->
+
+    </div><!-- container -->
+
+</div> <!-- Page content Wrapper -->
+
+<!-- JavaScript to handle the Decline button click and show/hide the input box -->
+<script>
+    document.getElementById('decline-btn').addEventListener('click', function(event) {
+        event.preventDefault();
+        document.getElementById('decline-reason').style.display = 'block';
+    });
+
+    document.getElementById('cancel-reason-btn').addEventListener('click', function() {
+        // Hide the reason input and reset the input field
+        document.getElementById('decline-reason').style.display = 'none';
+        document.getElementById('decline_reason').value = '';  // Clear the input
+    });
+</script>
+
+{%endblock%}

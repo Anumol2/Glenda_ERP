@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="page-title-box">
+                    <div class="btn-group float-right">
+                        <ol class="breadcrumb hide-phone p-0 m-0">
+                            <li class="breadcrumb-item"><a href="#">Zoogler</a></li>
+                            <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                            <li class="breadcrumb-item active">Validation</li>
+                        </ol>
+                    </div>
+                    <h4 class="page-title">Department and Permissions</h4>
+                </div>
+            </div>
+        </div>
+        <!-- end page title end breadcrumb -->
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            <h4 class="mt-4">Assign Permissions</h4>
+                            <div id="menu-container">
+                                {% for menu in form.menu.field.queryset %}
+                                    <input type="checkbox" name="menu" value="{{ menu.id }}" id="menu-{{ menu.id }}">
+                                    <label for="menu-{{ menu.id }}">{{ menu.title }}</label><br>
+                                {% endfor %}
+                            </div>
+                            <div id="submenu-container">
+                                <!-- Submenus will be dynamically populated here -->
+                            </div>
+                            <div class="form-group mb-0">
+                                <div>
+                                    <button type="submit" class="btn btn-primary waves-effect waves-light">
+                                        Submit
+                                    </button>
+                                    <button type="reset" class="btn btn-secondary waves-effect m-l-5">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div> <!-- end col -->
+        </div> <!-- end row -->
+    </div><!-- container -->
+</div> <!-- Page content Wrapper -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuContainer = document.getElementById('menu-container');
+        const submenuContainer = document.getElementById('submenu-container');
+
+        menuContainer.addEventListener('change', function() {
+            // Clear out all submenus initially
+            submenuContainer.innerHTML = '<h4 class="mt-4">Assign SubMenus:</h4>';
+
+            const selectedMenuIds = Array.from(menuContainer.querySelectorAll('input[name="menu"]:checked')).map(input => input.value);
+
+            selectedMenuIds.forEach(menuId => {
+                fetch(`/get-submenus/${menuId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const submenuWrapper = document.createElement('div');
+                        submenuWrapper.classList.add('submenu-group');
+                        submenuWrapper.id = `submenu-group-${menuId}`;
+
+                        data.forEach(submenu => {
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.name = `sub_menu_${menuId}`;  // Unique name for each menu's submenus
+                            checkbox.value = submenu.id;
+                            checkbox.id = `submenu-${submenu.id}`;
+
+                            const label = document.createElement('label');
+                            label.htmlFor = `submenu-${submenu.id}`;
+                            label.textContent = submenu.title;
+
+                            submenuWrapper.appendChild(checkbox);
+                            submenuWrapper.appendChild(label);
+                            submenuWrapper.appendChild(document.createElement('br'));
+                        });
+
+                        submenuContainer.appendChild(submenuWrapper);
+                    });
+            });
+        });
+    });
+</script>
+
+{% endblock %}

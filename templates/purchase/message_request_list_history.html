@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="page-content-wrapper ">
+
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="page-title-box d-flex justify-content-between align-items-center">
+                    <h4 class="page-title">Review History</h4>
+                </div>
+            </div>
+        </div>
+        <!-- end page title end breadcrumb -->
+
+        <div class="row mb-3">
+            <!-- Filter Dropdown with Date Picker -->
+            <div class="col text-left">
+                <form method="GET" action="{% url 'message_request_list_history' %}" id="filter-form" style="display: flex; align-items: center;">
+                    <!-- Main Filter Dropdown -->
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-purple waves-effect waves-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="mdi mdi-filter mr-2"></i>Filter by
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#" onclick="showDateFilter()">Date</a>
+                        </div>
+                    </div>
+
+                    <!-- Date Input (Date Picker) and Filter/Cancel Button -->
+                    <div id="date-filter-section" style="display: {% if is_filtered %}inline-flex{% else %}none{% endif %}; margin-left: 10px;">
+                        <input type="date" name="query" class="form-control" value="{{ query_date|default:'' }}" style="font-size: 14px; padding: 6px 10px; width: 160px; margin-right: 10px;" />
+                        <input type="date" name="query_end" class="form-control" value="{{ query_date_end|default:'' }}" style="font-size: 14px; padding: 6px 10px; width: 160px;" />
+                        <button class="btn btn-primary" type="submit" style="margin-left: 10px;">Filter</button>
+
+                        {% if is_filtered %}
+                            <!-- Cancel Filter Button -->
+                            <a href="{% url 'message_request_list_history' %}" class="btn btn-secondary" style="margin-left: 10px;">Cancel Filter</a>
+                        {% endif %}
+                    </div>
+
+                    <input type="hidden" name="filter" value="date">
+                </form>
+            </div>
+
+            <!-- Export to PDF and CSV button with dynamic query parameter -->
+            <div class="col text-right">
+                <div class="btn-group float-right">
+                    <div class="btn-group mo-mb-2">
+                        <button type="button" class="btn btn-success btn-sm">Export as</button>
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            {% if is_filtered %}
+                                <a class="dropdown-item" href="{% url 'raw_message_request_list_history_pdf' %}?query={{ query_date|urlencode }}&query_end={{ query_date_end|urlencode }}">PDF</a>
+                                <a class="dropdown-item" href="#?query={{ query_date|urlencode }}&query_end={{ query_date_end|urlencode }}">EXCEL</a>
+                            {% else %}
+                                <a class="dropdown-item" href="{% url 'raw_message_request_list_history_pdf' %}">PDF</a>
+                                <a class="dropdown-item" href="">EXCEL</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;">Request</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in message %}
+                                    <tr>
+                                        <td>Request for {{ i.category.category_name }}</td>
+                                        <td>
+                                            {{ i.status }}
+                                            {% if i.status == "Declined" %}
+                                                <button class="btn btn-sm btn-outline-danger" type="button" data-toggle="collapse" data-target="#reason-{{ forloop.counter }}" aria-expanded="false" aria-controls="reason-{{ forloop.counter }}" title="View Reason" style="background: none; border: none; padding: 0; margin: 0; color: #dc3545;">
+                                                    <i class="fas fa-eye" style="font-size: 1.2em; color: #6e54ab;"></i>
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ i.date }}</td>
+                                    </tr>
+                                    {% if i.status == "Declined" %}
+                                    <tr class="collapse" id="reason-{{ forloop.counter }}">
+                                        <td colspan="3">
+                                            <div class="card card-body" style="background-color: #e2e3e5;">
+                                                <strong>Reason for Decline:</strong> {{ i.response }}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> <!-- end col -->
+        </div> <!-- end row -->
+
+    </div><!-- container -->
+
+</div> <!-- Page content Wrapper -->
+
+<script>
+    function showDateFilter() {
+        document.getElementById('date-filter-section').style.display = 'inline-flex';
+    }
+</script>
+
+{% endblock %}

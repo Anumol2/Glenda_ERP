@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="page-content-wrapper">
+
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="page-title-box">
+                    <div class="btn-group float-right">
+                        <ol class="breadcrumb hide-phone p-0 m-0">
+                            <li class="breadcrumb-item"><a href="#">Zoogler</a></li>
+                            <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                            <li class="breadcrumb-item active">Validation</li>
+                        </ol>
+                    </div>
+                    <h4 class="page-title">Employee Details</h4>
+                </div>
+            </div>
+        </div>
+        <!-- end page title end breadcrumb -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+
+                        {% if messages %}
+                            <ul class="messages text-warning">
+                                {% for message in messages %}
+                                    <li class="{{ message.tags }}">{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+
+                        <h4 class="mt-0 header-title"></h4>
+                        <form class="" action="" method="post" onsubmit="return showAlert();" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                {{ form.emergency_contact_number }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_pincode">Pin Code</label>
+                                {{ form.pincode }}
+                            </div>
+
+
+                            <div class="form-group">
+                                <label for="id_district">District</label>
+                                {{ form.district }}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_state">State</label>
+                                {{ form.state }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_country">Country</label>
+                                {{ form.country }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_street">Street</label>
+                                {{ form.street }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_landmark">Landmark</label>
+                                {{ form.landmark }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Aadhar Number</label>
+                                {{ form.aadhar_no }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Aadhar Files</label>
+                                {{ form.aadhar_file }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Salary Information</label>
+                                {{ form.basic }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Date Of Birth</label>
+                                {{ form.date_of_birth }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Blood Group</label>
+                                {{ form.employee_blood_groups }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Pf Number</label>
+                                {{ form.pf_no }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Employee Esi Number</label>
+                                {{ form.employee_esi_no }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Qualification</label>
+                                {{ form.qualification }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Qualification Proof</label>
+                                {{ form.qualification_file }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Experience</label>
+                                {{ form.experience }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Experience Proof</label>
+                                {{ form.experience_file }}
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <div>
+                                    <button type="submit" class="btn btn-primary waves-effect waves-light">
+                                        Submit
+                                    </button>
+                                    <button type="reset" class="btn btn-secondary waves-effect m-l-5">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div> <!-- end col -->
+        </div> <!-- end row -->
+
+    </div><!-- container -->
+
+</div> <!-- Page content Wrapper -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Input field for pincode
+        $('#id_pincode').on('input', function() {
+            var pincode = $(this).val();
+
+            // Ensure the pincode is 6 digits long
+            if (pincode.length === 6) {
+                // Use India's Post Office API to fetch location details
+                $.ajax({
+                    url: 'https://api.postalpincode.in/pincode/' + pincode,
+                    method: 'GET',
+                    success: function(response) {
+                        if (response[0].Status === 'Success') {
+                            var postOffice = response[0].PostOffice[0];
+                            var district = postOffice.District;
+                            var state = postOffice.State;
+                            var street = postOffice.Name;
+                            var country = 'India'; // Set the Country field to a default value
+
+                            // Fill the form fields with the fetched data
+                            $('#id_district').val(district);
+                            $('#id_state').val(state);
+                            $('#id_street').val(street);  // Corrected ID here
+                            $('#id_country').val(country); // Update the Country field
+                        } else {
+                            alert('Invalid Pincode');
+                        }
+                    },
+                    error: function() {
+                        alert('Error fetching details. Please try again later.');
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+
+
+
+
+
+
+
+
+{% endblock %}
