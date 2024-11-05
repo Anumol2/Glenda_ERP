@@ -316,7 +316,7 @@ def raw_materials_stock_history(request, id):
 
     # Filter RD_stock entries associated with the retrieved RawMaterialsStock instances
     raw_materials = RD_stock.objects.filter(raw_materials__in=raw_materials_stock_qs).select_related(
-        'raw_materials', 'raw_materials_raw_materials', 'raw_materialsraw_materials_category'
+        'raw_materials', 'raw_materials__raw_materials', 'raw_materials__raw_materials__category'
     )
 
     # Date-based filtering
@@ -342,6 +342,7 @@ def raw_materials_stock_history(request, id):
 
     # Pass the filtered results and query_date to the template
     context = {
+        'raw_materials':raw_materials,
         'data': page_obj,
         'allocated_menus': allocated_menus,
         'id': id,
@@ -368,7 +369,7 @@ def raw_materials_stock_pdf(request, id):
     raw_materials = RD_stock.objects.filter(
         raw_materials__in=raw_materials_stock_qs
     ).select_related(
-        'raw_materials', 'raw_materials_raw_materials', 'raw_materialsraw_materials_category'
+        'raw_materials', 'raw_materials__raw_materials', 'raw_materials__raw_materials__category'
     )
 
     # Apply date filter only if both parsed dates are valid
@@ -416,7 +417,7 @@ def raw_materials_stock_excel(request, id):
     raw_materials = RD_stock.objects.filter(
         raw_materials__in=raw_materials_stock_qs
     ).select_related(
-        'raw_materials', 'raw_materials_raw_materials', 'raw_materialsraw_materials_category'
+        'raw_materials', 'raw_materials__raw_materials', 'raw_materials__raw_materials__category'
     )
 
     # Apply date filter only if both parsed dates are valid

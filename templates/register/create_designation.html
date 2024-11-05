@@ -33,11 +33,6 @@
 <!--            -->
                                             <form class="" action="" method="post">
                                         {% csrf_token %}
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-{% endif %}
 
                                                 <div class="form-group">
                                                     <label>Department</label>
