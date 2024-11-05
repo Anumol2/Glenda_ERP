@@ -87,30 +87,23 @@
                                     <th>Category</th>
                                     <th>Name</th>
                                     <th>Size</th>
-<<<<<<< HEAD:templates/purchase/view_raw_materials_history.html
                                     <th>Requested Stock</th>
                                     <th>Approved Stock</th>
                                     <th>Unapproved Stock</th>
-=======
-                                    <th>Arrived Stock</th>
->>>>>>> master:templates/inventory/view_raw_materials_history.html
                                     <th>Date</th>
 
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for i in data %}
+                                {% for i in raw_materials %}
                                     <tr>
                                         <th>{{ i.raw_materials.raw_materials.category.category_name }}</th>
                                         <td>{{ i.raw_materials.raw_materials.name }}</td>
                                         <td>{{ i.raw_materials.raw_materials.size }}</td>
-<<<<<<< HEAD:templates/purchase/view_raw_materials_history.html
                                         <td>{{ i.raw_materials.stock }}</td>
                                         <td>{{ i.approved_stock }}</td>
                                         <td>{{ i.unapproved_stock }}</td>
-=======
-                                        <td>{{ i.approved_stock }}</td>
->>>>>>> master:templates/inventory/view_raw_materials_history.html
+
                                         <td>{{ i.date }}</td>
                                     </tr>
                                 {% empty %}

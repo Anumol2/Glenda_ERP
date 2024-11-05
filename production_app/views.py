@@ -162,7 +162,6 @@ def delete_goods(request, id):
 
 
 def add_damaged_good_category(request):
-    # Fetch menus and counts
     use = request.user  # Get the current user
 
     # Get user's permissions
@@ -182,11 +181,10 @@ def add_damaged_good_category(request):
             form.save()
 
             messages.success(request, 'Successfull')
-
-            return redirect('add_category')
-        else:
-            form = DamagedForm(request.POST)
-        return render(request, 'production/damaged_good_category.html', {'form': form,  'allocated_menus': allocated_menus})
+            return redirect('damaged_goods')
+    else:
+        form = DamagedForm(request.POST)
+    return render(request, 'production/damaged_good_category.html', {'form': form, 'allocated_menus': allocated_menus})
 
 def damaged_goods(request):
     # Fetch menus and counts
