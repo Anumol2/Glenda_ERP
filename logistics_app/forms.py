@@ -11,12 +11,18 @@ class DriverForm(forms.ModelForm):
     class Meta:
         model = Driver
         fields = ['user', 'license_number', 'aadhaar_number', 'phone_number', 'license_exp_date', 'upload_license']
+        today = timezone.now().date()
+
         widgets = {
             'user': forms.Select(attrs={'class': 'form-control'}),
             'license_number': forms.TextInput(attrs={'class': 'form-control'}),
             'aadhaar_number': forms.TextInput(attrs={'class': 'form-control'}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'license_exp_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'license_exp_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'min': today + timezone.timedelta(days=1)  # Set min to tomorrow
+            }),
             'upload_license': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 

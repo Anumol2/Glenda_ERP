@@ -45,7 +45,17 @@ def staff_home(request):
 
 def register_view(request):
     # Fetching menus and their related submenus for display
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     if request.method == 'POST':
         form = CustomUserForm(request.POST,request.FILES)
@@ -65,11 +75,21 @@ def register_view(request):
         form = CustomUserForm()
 
     # Render the registration page with the form and menus
-    return render(request, 'register/create_user.html', {'form': form, 'menus': menus})
+    return render(request, 'register/create_user.html', {'form': form, 'allocated_menus': allocated_menus})
 
 
 def Edit_user(request,id):
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     user = get_object_or_404(CustomUser, id=id)
 
@@ -84,7 +104,7 @@ def Edit_user(request,id):
     else:
         form = CustomUserForm(instance=user)
 
-    return render(request, 'register/update_users.html', {'form': form,'menus':menus})
+    return render(request, 'register/update_users.html', {'form': form,'allocated_menus':allocated_menus})
 
 
 def delete_user_view(request, user_id):
@@ -195,7 +215,7 @@ def add_designation(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Designation added successfully!')
-            return redirect('add_designation')
+            return redirect('view_users')
     else:
         form = designation_Form()
 
@@ -217,11 +237,11 @@ def view_users(request):
 
 
     view = CustomUser.objects.filter(is_superuser=False, is_staff=True)
-    paginator = Paginator(view, 10)  # Show 10 designations per page
+    paginator = Paginator(view,5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'register/view_users.html', {'view': view, 'allocated_menus': allocated_menus,'page_obj':page_obj})
+    return render(request, 'register/view_users.html', {'allocated_menus': allocated_menus,'page_obj':page_obj})
 
 
 def create_permission(request, id):
@@ -291,9 +311,6 @@ def load_designations(request):
 
 
 def login_view(request):
-
-
-
     if request.method == 'POST':
         form = CustomLoginForm(request.POST)
         if form.is_valid():
@@ -302,35 +319,51 @@ def login_view(request):
             user = authenticate(request, email=email, password=password)
             if user is not None:
                 login(request, user)
-                # Redirect based on user role
+
+                # Check if user is superuser and redirect to admin dashboard
                 if user.is_superuser:
-                    return redirect('admin_home')  # Redirect to admin dashboard for superusers
+                    return redirect('admin_home')
 
+                # Redirect based on department name
                 department_name = user.department.dept_Name if user.department else None
-
-                # Redirect based on department and designation
-                if department_name == 'BDO':
-                    return redirect('admin_home')
-                elif user.is_staff:
-                    return redirect('admin_home')
-
+                if department_name == 'BOD':
+                    return redirect('management_index')
+                elif department_name == 'Admin':
+                    return redirect('management_index')
+                elif department_name == 'Sales':
+                    return redirect('sales_dashboard')
+                elif department_name == 'Purchase':
+                    return redirect('purchase_dashboard')
+                elif department_name == 'Inventory':
+                    return redirect('inventory_dashboard')
+                elif department_name == 'Logistics':
+                    return redirect('logistics_dashboard')
+                elif department_name == 'Production':
+                    return redirect('production_dashboard')
+                elif department_name == 'R & D':
+                    return redirect('rd_dashboard')
+                elif department_name == 'HR':
+                    return redirect('hr_dashboard')
+                elif department_name == 'Accounts':
+                    return redirect('accounts_dashboard')
                 else:
-                    return redirect('login')  # Default page for other users
+                    return redirect('login')  # Default fallback
+
             else:
-                # Add an error to the form if authentication fails
                 form.add_error(None, "Invalid email or password.")
     else:
         form = CustomLoginForm()
 
     return render(request, 'login.html', {'form': form})
 
+
 def logout_view(request):
     logout(request)
     # Redirect to a specific page after logout (e.g., home page)
     return redirect(reverse('admin'))
 
-def  user_search_export(request):
-    menus = Menu.objects.prefetch_related('submenus').all()
+# def  user_search_export(request):
+#     menus = Menu.objects.prefetch_related('submenus').all()
 
 def  user_search(request):
     use = request.user  # Get the current user
@@ -395,7 +428,7 @@ def  user_search(request):
 
 
     context = {
-        'view': user_list,  # This will be used in the template
+        'page_obj': user_list,  # This will be used in the template
         'allocated_menus': allocated_menus,
     }
 

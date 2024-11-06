@@ -30,44 +30,39 @@
                 <div class="card">
                     <div class="card-body">
 
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th style="width: 50%;">Request</th>
-                                <th>Status</th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                             {% with pending_found=False %}
-                               {% for i in data %}
-                                    {% if i.status == 'Pending' %}
-                                        {% with pending_found=True %}
-                                            <tr>
-                                                <td style="width: 50%;">Request for {{i.category.category_name}}</td>
-                                                <td>{{i.status}}</td>
-                                                <td class="text-end">
-                                                    <a href="{% url 'request_messages_detail' i.id %}">
-                                                        <button type="button" class="btn btn-primary"
-                                                            {% if i.status == 'Declined' or i.status == 'Accepted' %}disabled style="background-color: #856aa1; border-color: #856aa1;"{% endif %}>
-                                                            View Request
-                                                        </button>
-                                                    </a>
-                                                </td>
-                                                <td>{{i.date}}</td>
-                                            </tr>
-                                        {% endwith %}
-                                    {%  endif %}
-                                {% endfor %}
-                                 {% if not pending_found %}
-                                    <tr>
-                                        <td colspan="4" class="text-align-left">No pending requests</td>
-                                    </tr>
-                                 {% endif %}
-                             {% endwith %}
-                            </tbody>
-                        </table>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 50%;">Request</th>
+            <th>Status</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+         {% if data %}
+            {% for i in data %}
+                <tr>
+                    <td style="width: 50%;">Request for {{ i.category.category_name }}</td>
+                    <td>{{ i.status }}</td>
+                    <td class="text-end">
+                        <a href="{% url 'request_messages_detail' i.id %}">
+                            <button type="button" class="btn btn-primary"
+                                {% if i.status == 'Declined' or i.status == 'Accepted' %}disabled style="background-color: #856aa1; border-color: #856aa1;"{% endif %}>
+                                View Request
+                            </button>
+                        </a>
+                    </td>
+                    <td>{{ i.date }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="4" class="text-center">No pending requests</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
                     </div>
                 </div>
                 <!-- Pagination Controls -->

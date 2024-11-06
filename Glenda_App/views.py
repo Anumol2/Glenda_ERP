@@ -288,21 +288,146 @@ def create_submenu(request):
 
 
 def accounts_index(request):
-    return render(request,'index/accounts_index.html')
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
+    return render(request,'index/accounts_index.html',{'allocated_menus':allocated_menus})
 
 def sales_index(request):
-    return render(request,'index/sales_index.html')
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
+    return render(request,'index/sales_index.html',{'allocated_menus':allocated_menus})
 
 def production_index(request):
-    return render(request,'index/production_index.html')
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
+    return render(request,'index/production_index.html',{'allocated_menus':allocated_menus})
 
 def logistics_index(request):
-    return render(request,'index/logistics_index.html')
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
+    return render(request,'index/logistics_index.html',{'allocated_menus':allocated_menus})
+
 
 
 def Inventory_index(request):
-    return render(request,'index/logistics_index.html')
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
+    return render(request,'index/inventory_index.html',{'allocated_menus':allocated_menus})
+
 
 def Hr_index(request):
-    return render(request,'index/logistics_index.html')
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
+
+    return render(request,'index/hr_index.html',{'allocated_menus':allocated_menus})
+
+def management_index(request):
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
+
+
+
+
+    raw_materials = RawMaterials.objects.all()
+    la = [material.name for material in raw_materials]
+    tt = [material.total_stock for material in raw_materials]
+    # Get today's date
+    today = timezone.now().date()
+
+    # Define the last 7 days for the line chart
+    dates = [today - timedelta(days=i) for i in range(7)]
+
+    # Fetch finished goods stock data for the last 7 days
+    daily_stock_summary = Finished_Goods_Stock.objects.filter(date__gte=today - timedelta(days=6)).values(
+        'date').annotate(total_stock=Sum('stock')).order_by('date')
+
+    # Prepare data for the chart
+    labels = []
+    data = []
+
+    # Fill the labels and data with zeros for days without stock entries
+    for date in dates:
+        total_stock = 0
+        for entry in daily_stock_summary:
+            if entry['date'] == date:
+                total_stock = entry['total_stock'] or 0
+                break
+        labels.append(date.strftime('%Y-%m-%d'))  # Format date as needed
+        data.append(total_stock)  # Use total stock or 0 if no entry
+
+    # Prepare the context for rendering
+    context = {
+        'allocated_menus': allocated_menus,
+        'labels': la,
+        'data': tt,
+        'chart_data': {
+            'labels': labels,
+            'data': data,
+        },
+    }
+
+    return render(request,'index/top_management.html',context)
 
