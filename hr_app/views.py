@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404,reverse
-from register_app.models import CustomUser
+from register_app.models import CustomUser, MenuPermissions
 from hr_app.models import EmployeeDetails,RequestLeave,Payroll
 from Glenda_App.models import Menu
 from .forms import EmployeeDetailsForm,LeaveRequestForm,PayrollForm
@@ -16,13 +16,35 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import csv
 from decimal import Decimal  # For setting a default fallback value of zero
+from django.utils import timezone
 def Employee_list(request):
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
+
+
     # Fetch all users with is_staff=True
     users = CustomUser.objects.filter(is_staff=True,is_superuser=False)
 
     for user in users:
 
         user.details_added = EmployeeDetails.objects.filter(user=user).exists()
+<<<<<<< HEAD
+
+
+    # Pass the filtered HR employee details and menus to the context
+    context = {
+        'allocated_menus': allocated_menus,
+        'users':users
+=======
     paginator = Paginator(users,5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -30,12 +52,24 @@ def Employee_list(request):
     # Pass the filtered HR employee details and menus to the context
     context = {
         'page_obj':page_obj
+>>>>>>> master
     }
 
     return render(request, 'hr/Employee_list.html', context)
 
 def AddDetails(request, id):
-    menus = Menu.objects.prefetch_related('submenus').all()
+
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     if request.method == 'POST':
         form = EmployeeDetailsForm(request.POST, request.FILES)
@@ -60,19 +94,19 @@ def AddDetails(request, id):
 
         if EmployeeDetails.objects.filter(aadhar_no=aadhar_no).exists():
             messages.warning(request, 'Aadhar number already exists.')
-            return render(request, 'hr/add_employee_details.html', {'form': form, 'menus': menus})
+            return render(request, 'hr/add_employee_details.html', {'form': form, 'allocated_menus': allocated_menus})
 
         if EmployeeDetails.objects.filter(emergency_contact_number=emergency_contact_number).exists():
             messages.warning(request, 'Phone number already exists.')
-            return render(request, 'hr/add_employee_details.html', {'form': form, 'menus': menus})
+            return render(request, 'hr/add_employee_details.html', {'form': form, 'allocated_menus': allocated_menus})
 
         if EmployeeDetails.objects.filter(employee_esi_no=employee_esi_no).exists():
             messages.warning(request, 'ESI Number already exists.')
-            return render(request, 'hr/add_employee_details.html', {'form': form, 'menus': menus})
+            return render(request, 'hr/add_employee_details.html', {'form': form, 'allocated_menus': allocated_menus})
 
         if EmployeeDetails.objects.filter(pf_no=pf_no).exists():
             messages.warning(request, 'PF number already exists.')
-            return render(request, 'hr/add_employee_details.html', {'form': form, 'menus': menus})
+            return render(request, 'hr/add_employee_details.html', {'form': form, 'allocated_menus': allocated_menus})
 
         if form.is_valid():
             employee = form.save(commit=False)  # Do not save yet
@@ -83,17 +117,38 @@ def AddDetails(request, id):
     else:
         form = EmployeeDetailsForm()
 
-    return render(request, 'hr/add_employee_details.html', {'form': form, 'menus': menus})
+    return render(request, 'hr/add_employee_details.html', {'form': form, 'allocated_menus': allocated_menus})
 
 def view_employee_profile(request,id):
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     view = get_object_or_404(EmployeeDetails,user_id=id)
 
-    return render(request,'hr/view_employee_profile.html',{'view':view,'menus':menus})
+    return render(request,'hr/view_employee_profile.html',{'view':view,'allocated_menus':allocated_menus})
 
 def update_employee_details(request,id):
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
+
     view = get_object_or_404(EmployeeDetails, user_id=id)
 
     if request.method == 'POST':
@@ -105,10 +160,20 @@ def update_employee_details(request,id):
 
     else:
         form = EmployeeDetailsForm(request.POST, instance=view)
-    return render(request, 'hr/update_employee_details.html', {'view':view, 'menus': menus,'form':form})
+    return render(request, 'hr/update_employee_details.html', {'view':view, 'allocated_menus': allocated_menus,'form':form})
 
 def delete_employee_details(request, id):
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     # Fetch the object or return a 404 error if not found
     dtl = get_object_or_404(EmployeeDetails, id=id)
@@ -118,11 +183,21 @@ def delete_employee_details(request, id):
         return redirect('Employee_list')
 
     # Render the confirmation page for GET requests
-    return render(request, 'hr/delete_employee_details.html', {'dtl': dtl,'menus':menus})
+    return render(request, 'hr/delete_employee_details.html', {'dtl': dtl,'allocated_menus':allocated_menus})
 
 
 def employee_search_and_export(request):
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     # Start with an empty query to show all staff members by default
     employee_list = CustomUser.objects.filter(is_staff=True, is_superuser=False)
@@ -170,7 +245,7 @@ def employee_search_and_export(request):
     elif export_format == 'pdf':
         # PDF export
         template = get_template('hr/employee_details_pdf.html')  # A separate template for PDF
-        context = {'users': employee_list, 'menus': menus}
+        context = {'users': employee_list, 'allocated_menus': allocated_menus}
         html = template.render(context)
 
         response = HttpResponse(content_type='application/pdf')
@@ -191,7 +266,7 @@ def employee_search_and_export(request):
 
     context = {
         'users': employee_list,  # Filtered employees list
-        'menus': menus,
+        'allocated_menus': allocated_menus,
     }
 
     return render(request, 'hr/Employee_list.html', context)
@@ -216,11 +291,21 @@ def view_leave_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     # Pass the paginated leave_requests and menus to the context
     context = {
-        'menus': menus,
+        'allocated_menus': allocated_menus,
         'page_obj': page_obj  # Include the page object in the context
     }
 
@@ -258,7 +343,17 @@ def reject_leave_request(request):
 def my_profile(request):
     user = request.user
     leave_requests = RequestLeave.objects.filter(employee__user=user).order_by('-start_date')  # Order by date
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     # Pagination logic
     paginator = Paginator(leave_requests, 5)  # Show 5 requests per page
@@ -268,12 +363,23 @@ def my_profile(request):
     return render(request, 'hr/my_leave_request.html', {
         'user': user,
         'leave_requests': page_obj,
-        'menus': menus,
+        'allocated_menus': allocated_menus,
     })
 
 
 def leave_request_form(request):
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
+
     user = request.user
     emp=EmployeeDetails.objects.get(user_id=user)
     if request.method == 'POST':
@@ -287,7 +393,7 @@ def leave_request_form(request):
     else:
         form = LeaveRequestForm()
 
-    return render(request, 'hr/leave_request_form.html', {'form': form, 'menus': menus})
+    return render(request, 'hr/leave_request_form.html', {'form': form, 'allocated_menus': allocated_menus})
 
 
 def search_approved_leave_requests(request):
@@ -320,11 +426,21 @@ def search_approved_leave_requests(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     # Pass the paginated leave_requests and menus to the context
     context = {
-        'menus': menus,
+        'allocated_menus': allocated_menus,
         'page_obj': page_obj,  # Include the page object in the context
         'search_query': search_query,  # Include search query for form repopulation
     }
@@ -332,7 +448,17 @@ def search_approved_leave_requests(request):
     return render(request, 'hr/leave_list.html', context)
 
 def employee_detail(request):
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     # Get initial queryset for finished goods based on the provided ID
     Employee = EmployeeDetails.objects.all()
@@ -350,7 +476,7 @@ def employee_detail(request):
     # Prepare context for rendering template
     context = {
         'data': Employee,
-        'menus': menus,
+        'allocated_menus': allocated_menus,
         'filter_type': filter_type,
         'query_date': query_date,
         'is_filtered': is_filtered  # Pass flag to template
@@ -359,7 +485,17 @@ def employee_detail(request):
     return render(request, 'hr/employee_detail.html', context)
 
 def leave_history(request,id):
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     leave_request = RequestLeave.objects.filter(employee__user_id=id).order_by('-start_date')
 
@@ -376,7 +512,7 @@ def leave_history(request,id):
     # Prepare context for rendering template
     context = {
         'data': leave_request,
-        'menus': menus,
+        'allocated_menus': allocated_menus,
         'filter_type': filter_type,
         'query_date': query_date,
         'is_filtered': is_filtered  # Pass flag to template
@@ -447,7 +583,17 @@ def create_payroll(request, id):
     return render(request, 'hr/payroll_form.html', {'form': form, 'employee': employee, 'basic_salary': basic_salary})
 
 def payroll_summary(request,id):
-    menus = Menu.objects.prefetch_related('submenus').all()
+    use = request.user  # Get the current user
+
+    # Get user's permissions
+    user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
+
+    # Create a dictionary to hold menus and their allocated submenus
+    allocated_menus = {}
+    for perm in user_permissions:
+        if perm.menu not in allocated_menus:
+            allocated_menus[perm.menu] = []
+        allocated_menus[perm.menu].append(perm.sub_menu)
 
     payroll = Payroll.objects.filter(employee__user_id=id).order_by('-pay_date')
 
@@ -464,10 +610,54 @@ def payroll_summary(request,id):
     # Prepare context for rendering template
     context = {
         'data': payroll,
-        'menus': menus,
+        'allocated_menus': allocated_menus,
         'filter_type': filter_type,
         'query_date': query_date,
         'is_filtered': is_filtered  # Pass flag to template
     }
 
     return render(request, 'hr/payroll_summary.html', context)
+
+
+def payroll_by_month(request):
+    # Get current month and year
+    current_month = timezone.now().month
+    current_year = timezone.now().year
+
+    # Get month and year from GET parameters, defaulting to current values
+    selected_month = request.GET.get('month', current_month)
+    selected_year = request.GET.get('year', current_year)
+
+    # Convert selected_month and selected_year to integers
+    try:
+        selected_month = int(selected_month)
+        selected_year = int(selected_year)
+    except ValueError:
+        selected_month = current_month
+        selected_year = current_year
+
+    # Fetch payroll records for the selected month and year
+    payroll_records = Payroll.objects.filter(pay_date__month=selected_month,
+                                             pay_date__year=selected_year)
+
+    if not payroll_records.exists():
+        messages.warning(request, 'No payroll records found for this month.')
+
+    total_net_pay = sum(record.net_pay for record in payroll_records)
+
+    # Define months as tuples (month_number, month_name)
+    months = [
+        (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+        (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+        (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
+    ]
+
+    context = {
+        'payrolls': payroll_records,
+        'total_net_pay': total_net_pay,
+        'months': months,
+        'selected_month': selected_month,
+        'selected_year': selected_year,
+    }
+
+    return render(request, 'hr/salary_list_by_month.html', context)
