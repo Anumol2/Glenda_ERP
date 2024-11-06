@@ -331,21 +331,21 @@ def login_view(request):
                 elif department_name == 'Admin':
                     return redirect('management_index')
                 elif department_name == 'Sales':
-                    return redirect('sales_dashboard')
+                    return redirect('sales_index')
                 elif department_name == 'Purchase':
                     return redirect('purchase_dashboard')
                 elif department_name == 'Inventory':
-                    return redirect('inventory_dashboard')
+                    return redirect('Inventory_index')
                 elif department_name == 'Logistics':
-                    return redirect('logistics_dashboard')
+                    return redirect('logistics_index')
                 elif department_name == 'Production':
-                    return redirect('production_dashboard')
+                    return redirect('production_index')
                 elif department_name == 'R & D':
                     return redirect('rd_dashboard')
                 elif department_name == 'HR':
-                    return redirect('hr_dashboard')
+                    return redirect('Hr_index')
                 elif department_name == 'Accounts':
-                    return redirect('accounts_dashboard')
+                    return redirect('accounts_index')
                 else:
                     return redirect('login')  # Default fallback
 
