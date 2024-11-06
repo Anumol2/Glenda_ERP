@@ -17,4 +17,5 @@ urlpatterns = [
     path('leave_history/<int:id>',views.leave_history,name='leave_history'),
     path('create_payroll/<int:id>',views.create_payroll,name='create_payroll'),
     path('payroll_summary/<int:id>',views.payroll_summary,name='payroll_summary'),
+    path('payroll-by-month/', views.payroll_by_month, name='payroll_by_month'),
 ]
