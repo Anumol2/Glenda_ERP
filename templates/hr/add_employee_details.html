@@ -25,13 +25,6 @@
                 <div class="card">
                     <div class="card-body">
 
-                        {% if messages %}
-                            <ul class="messages text-warning">
-                                {% for message in messages %}
-                                    <li class="{{ message.tags }}">{{ message }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
 
                         <h4 class="mt-0 header-title"></h4>
                         <form class="" action="" method="post" onsubmit="return showAlert();" enctype="multipart/form-data">

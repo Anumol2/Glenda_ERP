@@ -295,11 +295,10 @@ def update_damage(request,id):
 
 
 def request_messages(request):
+    # Fetch the current logged-in user
+    use = request.user
 
-    # Fetch menus and counts
-    use = request.user  # Get the current user
-
-    # Get user's permissions
+    # Get the user's permissions for menus
     user_permissions = MenuPermissions.objects.filter(user=use).select_related('menu', 'sub_menu')
 
     # Create a dictionary to hold menus and their allocated submenus
@@ -309,14 +308,22 @@ def request_messages(request):
             allocated_menus[perm.menu] = []
         allocated_menus[perm.menu].append(perm.sub_menu)
 
-    data = Finished_Goods_Request.objects.all().order_by('-date')
+    # Fetch only the requests with status 'Pending'
+    data = Finished_Goods_Request.objects.filter(status='Pending').order_by('-date')
+
+    # Check if there are any pending requests
+
 
     # Pagination logic
     paginator = Paginator(data, 5)  # Show 5 requests per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request,'production/production_request_messages.html',{'data':page_obj,'allocated_menus':allocated_menus})
+    # Render the page with the data
+    return render(request, 'production/production_request_messages.html', {
+        'data': page_obj,
+        'allocated_menus': allocated_menus
+    })
 
 
 

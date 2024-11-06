@@ -23,13 +23,13 @@ def Employee_list(request):
     for user in users:
 
         user.details_added = EmployeeDetails.objects.filter(user=user).exists()
-
-    menus = Menu.objects.prefetch_related('submenus').all()
+    paginator = Paginator(users,5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     # Pass the filtered HR employee details and menus to the context
     context = {
-        'menus': menus,
-        'users':users
+        'page_obj':page_obj
     }
 
     return render(request, 'hr/Employee_list.html', context)
