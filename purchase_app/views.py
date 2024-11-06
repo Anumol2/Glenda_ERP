@@ -316,7 +316,7 @@ def add_stocks(request, id):
     })
 
 
-def rawmaterials_stock_history(request, id):
+def rawmaterials_stock_history(request,id):
     # Fetch menus and counts
     use = request.user  # Get the current user
 

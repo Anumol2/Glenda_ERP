@@ -57,24 +57,24 @@
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">Requests Review History</h1>
+    <h1 style="text-align: center;">{{name.raw_materials.name}} Stock History</h1>
     <table class="table table-bordered table-hover" id="my-table">
         <thead>
             <tr>
-                <th data-priority="1">Category</th>
-                <th data-priority="2">Status</th>
-                <th data-priority="3">Date and Time</th>
+                <th>Category</th>
+                <th data-priority="1">Name</th>
+                <th data-priority="3">Size</th>
+                <th data-priority="3">Stock</th>
+                <th data-priority="1">Date</th>
             </tr>
         </thead>
         <tbody>
             {% for i in view %}
                 <tr>
-                    <th>Request for {{ i.category.category_name }}</th>
-                    <td>{{ i.status }}</td>
-<<<<<<< HEAD
-=======
-
->>>>>>> master
+                    <th>{{ i.raw_materials.raw_materials.category.category_name }}</th>
+                    <td>{{ i.raw_materials.raw_materials.name }}</td>
+                    <td>{{ i.raw_materials.raw_materials.size }}</td>
+                    <td>{{ i.approved_stock }}</td>
                     <td>{{ i.date }}</td>
                 </tr>
             {% endfor %}

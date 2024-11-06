@@ -37,12 +37,22 @@ def Employee_list(request):
     for user in users:
 
         user.details_added = EmployeeDetails.objects.filter(user=user).exists()
+<<<<<<< HEAD
 
 
     # Pass the filtered HR employee details and menus to the context
     context = {
         'allocated_menus': allocated_menus,
         'users':users
+=======
+    paginator = Paginator(users,5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Pass the filtered HR employee details and menus to the context
+    context = {
+        'page_obj':page_obj
+>>>>>>> master
     }
 
     return render(request, 'hr/Employee_list.html', context)
